@@ -1,27 +1,33 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { Product } from './product.entity';
+import { ApiResponse } from '../common/api-response';
 
 @Controller('products')
 export class ProductsController {
-    constructor(private readonly productsService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService) {}
 
-    @Post()
-    createProduct(@Body() product: Product) {
-        const newProduct = this.productsService.createProduct(product);
-        
-        return {
-            message: 'Product created successfully',
-            product: newProduct
-        }
-    }
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  createProduct(@Body() product: Product): ApiResponse<Product> {
+    const newProduct = this.productsService.createProduct(product);
+    return ApiResponse.success(
+      newProduct,
+      'Product created successfully',
+      HttpStatus.CREATED,
+    );
+  }
 
-    @Get()
-    getAllProducts() {
-        const products: Product[] = this.productsService.getAllProducts();
-        
-        return {
-            products
-        }
-    }
+  @Get()
+  getAllProducts(): ApiResponse<Product[]> {
+    const products = this.productsService.getAllProducts();
+    return ApiResponse.success(products, 'Products retrieved successfully');
+  }
 }
